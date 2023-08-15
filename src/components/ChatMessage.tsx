@@ -2,35 +2,40 @@ import {readableColor} from "polished";
 import {useEffect, useState} from "react";
 import styled, {css} from "styled-components";
 import ChatMessageType from "../lib/twitch-irc/chatMessageType";
+import ChatMessageText from "./ChatMessageText";
 
-const IdentityContainer = styled.div<{$color: string}>`
+const IdentityContainer = styled.div<{ $color: string }>`
   position: absolute;
   top: -.75rem;
 
   background-color: ${({$color}) => $color};
-  
+
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 1.25rem;
   color: ${({$color}) => readableColor($color)};
-  
+
   padding-block: .25rem;
   padding-inline: .5rem;
 `
 
 const ContentContainer = styled.div`
   background-color: white;
-  
+
   border-radius: 25px;
 
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  font-weight: 500;
   
-  padding: 1rem;
+  line-height: 2rem;
+
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  padding-inline: 1rem;
 `
 
 const AlignMessageContentStart = css`
   align-self: flex-start;
-  
+
   ${IdentityContainer} {
     border-radius: 3px 10px 3px 10px;
     left: 0;
@@ -43,24 +48,27 @@ const AlignMessageContentStart = css`
 
 const AlignMessageContentEnd = css`
   align-self: flex-end;
-  
+
   ${IdentityContainer} {
     border-radius: 10px 3px 10px 3px;
     right: 0;
   }
-  
+
   ${ContentContainer} {
     margin-right: 1rem;
   }
 `
 
-const ChatMessageContainer = styled.div<{$align: "start" | "end"}>`
+const ChatMessageContainer = styled.div<{ $align: "start" | "end" }>`
   position: relative;
   display: inline-block;
 
   font-family: Arial, Helvetica, sans-serif;
 
   ${({$align}) => $align === "start" ? AlignMessageContentStart : AlignMessageContentEnd}
+  
+  max-width: 80%;
+  min-width: 30%;
 `
 
 type ChatMessageProps = {
@@ -83,11 +91,13 @@ const ChatMessage = ({message, className}: ChatMessageProps) => {
         >
             <IdentityContainer
                 $color={message.color ?? 'black'
-            }>
+                }>
                 {message.displayName ?? message.userLogin}
             </IdentityContainer>
             <ContentContainer>
-                {message.text}
+                <ChatMessageText
+                    text={message.text}
+                />
             </ContentContainer>
         </ChatMessageContainer>
     );
