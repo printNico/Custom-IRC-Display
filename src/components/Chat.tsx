@@ -188,6 +188,7 @@ const Chat = () => {
 
             chatMsgSubscription.current = client.OnChatMessage
                 .subscribe((message) => {
+                    console.log(message)
                     unshiftMessage(message)
                 })
         }

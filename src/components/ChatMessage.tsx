@@ -2,11 +2,16 @@ import {readableColor} from "polished";
 import {useEffect, useState} from "react";
 import styled, {css} from "styled-components";
 import ChatMessageType from "../lib/twitch-irc/chatMessageType";
+import ChatMessageBadges from "./ChatMessageBadges";
 import ChatMessageText from "./ChatMessageText";
 
 const IdentityContainer = styled.div<{ $color: string }>`
   position: absolute;
-  top: -.75rem;
+  top: -1em;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
 
   background-color: ${({$color}) => $color};
 
@@ -14,18 +19,25 @@ const IdentityContainer = styled.div<{ $color: string }>`
   font-size: 1.25rem;
   color: ${({$color}) => readableColor($color)};
 
-  padding-block: .25rem;
-  padding-inline: .5rem;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.2);
+
+  padding-block: .4rem;
+  padding-inline: 1rem;
 `
 
 const ContentContainer = styled.div`
-  background-color: white;
+  background-color: rgba(240, 240, 240, 1);
 
   border-radius: 25px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.2);
 
   font-size: 1.5rem;
   font-weight: 500;
-  
+
   line-height: 2rem;
 
   padding-top: 1.5rem;
@@ -90,13 +102,14 @@ const ChatMessage = ({message, className}: ChatMessageProps) => {
             $align={messageAlignment}
         >
             <IdentityContainer
-                $color={message.color ?? 'black'
-                }>
+                $color={message.color ?? 'black'}
+            >
+                <ChatMessageBadges message={message}/>
                 {message.displayName ?? message.userLogin}
             </IdentityContainer>
             <ContentContainer>
                 <ChatMessageText
-                    text={message.text}
+                    message={message}
                 />
             </ContentContainer>
         </ChatMessageContainer>
