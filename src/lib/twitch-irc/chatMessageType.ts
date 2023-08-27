@@ -46,6 +46,14 @@ const readMessageTags = (messagePart: string): ChatMessageType | undefined => {
             case'badge-info':
                 continue;
             case'badges':
+                if (!result.badges) result.badges = [];
+                const badgeParts = tagValue.split(',');
+                for (const badgePart of badgeParts) {
+                    const badgeData = badgePart.split('/');
+                    const badgeName = badgeData[0];
+                    const badgeVersion = badgeData[1];
+                    result.badges.push({badgeId: badgeName, version: badgeVersion})
+                }
                 continue;
             case'bits':
                 result.bits = parseInt(tagValue)
@@ -57,6 +65,17 @@ const readMessageTags = (messagePart: string): ChatMessageType | undefined => {
                 result.displayName = tagValue;
                 continue;
             case'emotes':
+                const emoteParts = tagValue.split('/');
+                if (!result.emotes) result.emotes = [];
+                for (const emotePart of emoteParts) {
+                    const emoteData = emotePart.split(':');
+                    const emoteId = emoteData[0];
+                    const emoteRanges = emoteData[1].split('-');
+
+                    const emoteStart = parseInt(emoteRanges[0]);
+                    const emoteEnd = parseInt(emoteRanges[1]);
+                    result.emotes.push({emoteId: emoteId, startIndex: emoteStart, endIndex: emoteEnd})
+                }
                 continue;
             case'id':
                 result.id = tagValue;
@@ -218,7 +237,7 @@ interface ChatMessageType {
 
     bits: number | undefined
     badgeInfo: NameValuePair | undefined
-    badges: NameValuePair[] | undefined
+    badges: Badge[] | undefined
     emotes: Emote[] | undefined
     pinnedPaidChatMessage: PinnedPaidChatMessage | undefined
     replyChatMessage: ReplyChatMessage | undefined
@@ -229,10 +248,15 @@ type NameValuePair<N = string, V = string> = {
     value: V
 }
 
+type Badge = {
+    badgeId: string
+    version: string
+}
+
 type Emote = {
     emoteId: string
-    startIndex: string
-    endIndex: string
+    startIndex: number
+    endIndex: number
 }
 
 type PinnedPaidChatMessage = {

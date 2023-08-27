@@ -7,7 +7,10 @@ const ChatMessageEmoteDiv = styled.div`
 `
 
 const Image = styled.img`
-  margin: -0.5rem 0
+  margin: -0.5em 0;
+  
+  height: 40px;
+  width: 40px;
 `
 
 type ChatMessageEmoteContainerProps = {
