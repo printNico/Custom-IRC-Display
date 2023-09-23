@@ -6,7 +6,7 @@ const CAP = (values: string[]) => {
     if (filteredValues.length <= 0)
         throw new Error("Values can't be empty")
 
-    const joinedCapabilitiesString = filteredValues.join(",")
+    const joinedCapabilitiesString = filteredValues.join(" ")
 
     return `CAP REQ :${joinedCapabilitiesString}`
 }
