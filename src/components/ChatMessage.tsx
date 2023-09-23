@@ -1,5 +1,5 @@
 import {readableColor} from "polished";
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useState} from "react";
 import styled, {css} from "styled-components";
 import ChatMessageType from "../lib/twitch-irc/chatMessageType";
 import ChatMessageBadges from "./ChatMessageBadges";

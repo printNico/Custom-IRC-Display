@@ -21,11 +21,14 @@ const ChatContainer = styled.div`
 
 const Chat = () => {
     const chatContainerRef = useRef<HTMLDivElement>(null);
+    const [messages, pushMessage, unshiftMessage, clearChatMessages, removeMsgByFilter] = useLimitedArray<ChatMessageType>([], 20);
+
     const {client} = useTwitchIRCClientContext();
     const conStateSubscription = useRef<Subscription | undefined>();
     const chatMsgSubscription = useRef<Subscription | undefined>();
-
-    const [messages, pushMessage, unshiftMessage] = useLimitedArray<ChatMessageType>([], 20);
+    const clearChatSubscription = useRef<Subscription | undefined>();
+    const chatClearUserMsgSubscription = useRef<Subscription | undefined>();
+    const chatClearMsgSubscription = useRef<Subscription | undefined>();
 
     useEffect(() => {
         if (client) {
@@ -39,6 +42,23 @@ const Chat = () => {
                 .subscribe((message) => {
                     pushMessage(message)
                 })
+
+            clearChatSubscription.current = client.OnChatClear
+                .subscribe(() => {
+                    clearChatMessages();
+                })
+
+            chatClearUserMsgSubscription.current = client.OnChatUserClearMessages
+                .subscribe((message) => {
+                    console.log(message)
+                    removeMsgByFilter((msg) => msg.userId === message.targetUserId)
+                })
+
+            chatClearMsgSubscription.current = client.OnChatClearMessage
+                .subscribe((message) => {
+                    console.log(message)
+                    removeMsgByFilter((msg) => msg.id === message.targetMessageId)
+                })
         }
 
         return () => {
@@ -48,6 +68,18 @@ const Chat = () => {
 
             if (chatMsgSubscription.current) {
                 chatMsgSubscription.current!.unsubscribe()
+            }
+
+            if (clearChatSubscription.current) {
+                clearChatSubscription.current!.unsubscribe()
+            }
+
+            if (chatClearUserMsgSubscription.current) {
+                chatClearUserMsgSubscription.current!.unsubscribe()
+            }
+
+            if (chatClearMsgSubscription.current) {
+                chatClearMsgSubscription.current!.unsubscribe()
             }
         }
     }, [client]);
@@ -68,7 +100,7 @@ const Chat = () => {
     );
 };
 
-type LimitedArrayHook<V> = [values: V[], push: (value: V) => void, unshift: (value: V) => void]
+type LimitedArrayHook<V> = [values: V[], push: (value: V) => void, unshift: (value: V) => void, clear:() => void, removeByFilter: (filterFunc: (value: V) => boolean) => void]
 
 const useLimitedArray = <V, >(initialState: V[] = [], limit: number = 100): LimitedArrayHook<V> => {
     const [values, setValues] = useState<V[]>(initialState);
@@ -93,10 +125,22 @@ const useLimitedArray = <V, >(initialState: V[] = [], limit: number = 100): Limi
         })
     }
 
+    const clear = () => {
+        setValues([])
+    }
+
+    const removeByFilter = (filterFunc: (value: V) => boolean) => {
+        setValues(old => {
+            return old.filter((value) => !filterFunc(value))
+        })
+    }
+
     return [
         values,
         push,
-        unshift
+        unshift,
+        clear,
+        removeByFilter
     ]
 }
 

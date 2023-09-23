@@ -1,5 +1,6 @@
 import {filter, Observable, Subject, Subscription} from "rxjs";
 import ChatMessageType, {convertToChatMessage} from "../chatMessageType";
+import ClearChatMessageType, {convertToClearChatMessage} from "../clearChatMessageType";
 import {REQUESTS} from "./ircMessages";
 import convertEventToResponse, {TwitchIRCResponse} from "./ircResponse";
 import TwitchIRC from "../types/twitchIRC";
@@ -30,6 +31,10 @@ class TwitchIRCClient {
 
     private _onChatMessage$: Subject<ChatMessageType> = new Subject<ChatMessageType>();
 
+    private _onChatClear$: Subject<ClearChatMessageType> = new Subject<ClearChatMessageType>();
+    private _onChatUserClearMessages$: Subject<ClearChatMessageType> = new Subject<ClearChatMessageType>();
+    private _onChatClearMessage$: Subject<ClearChatMessageType> = new Subject<ClearChatMessageType>();
+
     private _globalSubscriptions: Subscription[] = [];
 
     constructor(configuration: TwitchIRC.Configuration) {
@@ -47,6 +52,18 @@ class TwitchIRCClient {
 
     public get OnChatMessage(): Observable<ChatMessageType> {
         return this._onChatMessage$.asObservable();
+    }
+
+    public get OnChatClear(): Observable<ClearChatMessageType> {
+        return this._onChatClear$.asObservable();
+    }
+
+    public get OnChatUserClearMessages(): Observable<ClearChatMessageType> {
+        return this._onChatUserClearMessages$.asObservable();
+    }
+
+    public get OnChatClearMessage(): Observable<ClearChatMessageType> {
+        return this._onChatClearMessage$.asObservable();
     }
 
     public async join(channels?: string[]) {
@@ -114,10 +131,12 @@ class TwitchIRCClient {
             this.registerWebSocketEventListeners();
             this.registerPingHandler()
             this.registerPrivMsgHandler();
+            this.registerClearChatHandler();
+            this.registerClearMsgHandler();
 
             const subOnOpen = this._onWebSocketOpen$
                 .subscribe(() => {
-                    const capabilities = ['twitch.tv/tags']
+                    const capabilities = ['twitch.tv/tags', 'twitch.tv/commands']
                     this._webSocketClient!.send(REQUESTS.CAP(capabilities));
 
                     // Send message containing password
@@ -182,6 +201,32 @@ class TwitchIRCClient {
             .subscribe((evMsg) => {
                 const message = convertToChatMessage(evMsg);
                 this._onChatMessage$.next(message)
+            })
+
+        this._globalSubscriptions.push(subscription);
+    }
+
+    private registerClearChatHandler() {
+        const subscription = this._onWebSocketMessage$
+            .pipe(filter(x => x.responseType === "CLEARCHAT"))
+            .subscribe((evMsg) => {
+                const message = convertToClearChatMessage(evMsg);
+                if(message.targetUserId) {
+                    this._onChatUserClearMessages$.next(message)
+                } else {
+                    this._onChatClear$.next(message)
+                }
+            })
+
+        this._globalSubscriptions.push(subscription);
+    }
+
+    private registerClearMsgHandler() {
+        const subscription = this._onWebSocketMessage$
+            .pipe(filter(x => x.responseType === "CLEARMSG"))
+            .subscribe((evMsg) => {
+                const message = convertToClearChatMessage(evMsg);
+                this._onChatClearMessage$.next(message)
             })
 
         this._globalSubscriptions.push(subscription);

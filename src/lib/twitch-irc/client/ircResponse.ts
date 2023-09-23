@@ -5,6 +5,8 @@ export type TwitchIRCResponseType =
     "AUTH_FAILED" |
     "JOIN_SUCCESS" |
     "PRIVMSG" |
+    "CLEARCHAT" |
+    "CLEARMSG" |
     "PING" |
     "NONE"
 
@@ -59,6 +61,28 @@ const privMsgMatcher = (event: WebSocketEvent): TwitchIRCResponseType | null => 
     return null;
 }
 
+const clrChatMatcher = (event: WebSocketEvent): TwitchIRCResponseType | null => {
+    const regex = /:tmi\.twitch\.tv CLEARCHAT #/;
+    const msg = event.data;
+
+    if (msg.match(regex)) {
+        return "CLEARCHAT"
+    }
+
+    return null;
+}
+
+const clrMsgMatcher = (event: WebSocketEvent): TwitchIRCResponseType | null => {
+    const regex = /:tmi\.twitch\.tv CLEARMSG #/;
+    const msg = event.data;
+
+    if (msg.match(regex)) {
+        return "CLEARMSG"
+    }
+
+    return null;
+}
+
 const pingMatcher = (event: WebSocketEvent): TwitchIRCResponseType | null => {
     const msg = event.data
 
@@ -74,6 +98,8 @@ const typeMatchers: ((event: WebSocketEvent) => TwitchIRCResponseType | null)[] 
     authFailedMatcher,
     joinSuccessMatcher,
     privMsgMatcher,
+    clrChatMatcher,
+    clrMsgMatcher,
     pingMatcher
 ]
 
