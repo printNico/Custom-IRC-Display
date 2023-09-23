@@ -21,7 +21,7 @@ const ChatContainer = styled.div`
 
 const Chat = () => {
     const chatContainerRef = useRef<HTMLDivElement>(null);
-    const [messages, pushMessage, unshiftMessage, clearChatMessages, removeMsgByFilter] = useLimitedArray<ChatMessageType>([], 20);
+    const [messages, pushMessage, _, clearChatMessages, removeMsgByFilter] = useLimitedArray<ChatMessageType>([], 20);
 
     const {client} = useTwitchIRCClientContext();
     const conStateSubscription = useRef<Subscription | undefined>();
