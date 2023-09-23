@@ -9,12 +9,13 @@ import ChatMessage from "./ChatMessage";
 const ChatContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
-  
-  padding-block: 1rem;
+  gap: 2.75rem;
+
+  padding-block: 1.75rem;
+  padding-inline: .25rem;
 
   overflow: hidden;
-  
+
   max-width: 100vw;
   max-height: 90vh;
 `
@@ -85,8 +86,13 @@ const Chat = () => {
     }, [client]);
 
     useEffect(() => {
-        if(!chatContainerRef.current) return;
-        setTimeout(() => {chatContainerRef.current!.scrollTo({top: chatContainerRef.current!.scrollHeight, behavior: 'smooth'})}, 250);
+        if (!chatContainerRef.current) return;
+
+        const scrollTo = chatContainerRef.current!.scrollHeight;
+        setTimeout(() => {
+            if (!chatContainerRef.current) return;
+            chatContainerRef.current.scrollTo({top: scrollTo, behavior: 'smooth'})
+        }, 100);
     }, [messages]);
 
     return (
@@ -100,7 +106,7 @@ const Chat = () => {
     );
 };
 
-type LimitedArrayHook<V> = [values: V[], push: (value: V) => void, unshift: (value: V) => void, clear:() => void, removeByFilter: (filterFunc: (value: V) => boolean) => void]
+type LimitedArrayHook<V> = [values: V[], push: (value: V) => void, unshift: (value: V) => void, clear: () => void, removeByFilter: (filterFunc: (value: V) => boolean) => void]
 
 const useLimitedArray = <V, >(initialState: V[] = [], limit: number = 100): LimitedArrayHook<V> => {
     const [values, setValues] = useState<V[]>(initialState);
