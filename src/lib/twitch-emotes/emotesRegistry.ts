@@ -10,15 +10,21 @@ import {DisposeInterface} from "./types/disposeInterface";
 class EmotesRegistry implements DisposeInterface {
     private registeredEmotes: Array<AbstractEmotes & DisposeInterface> = []
 
-    constructor() {
+    private readonly providerName: string = "twitch";
+    private readonly channelId: string;
+
+    constructor(providerName: string, channelId: string) {
+        this.providerName = providerName;
+        this.channelId = channelId;
+
         this.registeredEmotes.push(new BttvGlobalEmotes())
-        this.registeredEmotes.push(new BttvChannelEmotes())
+        this.registeredEmotes.push(new BttvChannelEmotes(this.providerName, this.channelId))
 
         this.registeredEmotes.push(new SeventvGlobalEmotes())
-        this.registeredEmotes.push(new SeventvChannelEmotes())
+        this.registeredEmotes.push(new SeventvChannelEmotes(this.providerName, this.channelId))
 
         this.registeredEmotes.push(new FrankerfacezGlobalEmotes())
-        this.registeredEmotes.push(new FrankerfacezChannelEmotes())
+        this.registeredEmotes.push(new FrankerfacezChannelEmotes(this.providerName, this.channelId))
     }
 
     public getEmoteByCode(code: string) {

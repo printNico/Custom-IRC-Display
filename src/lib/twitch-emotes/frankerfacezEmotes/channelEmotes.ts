@@ -4,16 +4,20 @@ import {EmoteUrls} from "../types/emote";
 import {FrankerfacezEmoteResponse} from "./types";
 
 class FrankerfacezChannelEmotes extends AbstractEmotes implements DisposeInterface {
-    constructor() {
+    private readonly providerName: string = "twitch";
+    private readonly channelId: string;
+
+    constructor(providerName: string, channelId: string) {
         super();
+
+        this.providerName = providerName;
+        this.channelId = channelId;
 
         this.loadChannelEmotes();
     }
 
     private loadChannelEmotes() {
-        const providerUserId = "108210905";
-
-        fetch(`https://api.frankerfacez.com/v1/room/id/${providerUserId}`)
+        fetch(`https://api.frankerfacez.com/v1/room/id/${this.channelId}`)
             .then(response => response.json())
             .then(({sets}: FrankerfacezEmoteResponse) => {
                 Object.values(sets).forEach(({emoticons}) => {

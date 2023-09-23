@@ -7,18 +7,21 @@ class SeventvChannelEmotes extends AbstractEmotes implements DisposeInterface {
     private websocket: WebSocket | undefined;
     private emoteSetId: string | undefined;
 
-    constructor() {
+    private readonly providerName: string = "twitch";
+    private readonly channelId: string;
+
+    constructor(providerName: string, channelId: string) {
         super();
+
+        this.providerName = providerName;
+        this.channelId = channelId;
 
         this.loadChannelEmotes();
         this.registerChannelEmotesUpdateHandler();
     }
 
     private loadChannelEmotes() {
-        const providerName = "twitch"
-        const providerUserId = "108210905";
-
-        fetch(`https://7tv.io/v3/users/${providerName}/${providerUserId}`)
+        fetch(`https://7tv.io/v3/users/${this.providerName}/${this.channelId}`)
             .then(response => response.json())
             .then(({emote_set}: SeventvEmoteResponse) => {
                 this.emoteSetId = emote_set.id;

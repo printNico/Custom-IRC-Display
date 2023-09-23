@@ -5,8 +5,14 @@ import {BttvEmote, BttvEmoteEvent} from "./types";
 class BttvChannelEmotes extends AbstractEmotes implements DisposeInterface {
     private websocket: WebSocket | undefined;
 
-    constructor() {
+    private readonly providerName: string = "twitch";
+    private readonly channelId: string;
+
+    constructor(providerName: string, channelId: string) {
         super();
+
+        this.providerName = providerName;
+        this.channelId = channelId;
 
         this.loadChannelEmotes();
         this.registerChannelEmotesUpdateHandler();
@@ -17,10 +23,7 @@ class BttvChannelEmotes extends AbstractEmotes implements DisposeInterface {
     }
 
     private loadChannelEmotes(): void {
-        const providerName = "twitch"
-        const providerUserId = "108210905"
-
-        fetch(`https://api.betterttv.net/3/cached/users/${providerName}/${providerUserId}`)
+        fetch(`https://api.betterttv.net/3/cached/users/${this.providerName}/${this.channelId}`)
             .then(response => response.json())
             .then(({channelEmotes, sharedEmotes}: { channelEmotes: BttvEmote[], sharedEmotes: BttvEmote[] }) => {
                 const allEmotes = [...channelEmotes, ...sharedEmotes];
@@ -91,7 +94,9 @@ class BttvChannelEmotes extends AbstractEmotes implements DisposeInterface {
         this.websocket = new WebSocket(`wss://sockets.betterttv.net/ws`);
 
         this.websocket.addEventListener("open", () => {
-            this.websocket!.send(BTTV_WS_JOIN_CHANNEL("twitch", "108210905"));
+            if(this.providerName && this.channelId) {
+                this.websocket!.send(BTTV_WS_JOIN_CHANNEL(this.providerName, this.channelId));
+            }
         })
 
         this.websocket.addEventListener("message", (event) => {

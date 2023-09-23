@@ -20,7 +20,7 @@ const useCreateEmoteRegistry = () => {
 
     useEffect(() => {
         if (!emoteRegistryRef.current) {
-            emoteRegistryRef.current = new EmotesRegistry();
+            emoteRegistryRef.current = new EmotesRegistry("twitch", "108210905");
             setEmoteRegistry(emoteRegistryRef.current);
         }
     }, []);
